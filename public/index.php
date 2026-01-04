@@ -2,9 +2,22 @@
 
 declare(strict_types=1);
 
-// Autoload ultra simple (sans Composer pour l’instant)
-require __DIR__ . '/../app/Controllers/HomeController.php';
+require __DIR__ . '/../vendor/autoload.php';
 
-// Route "home" par défaut
-$controller = new HomeController();
-$controller->index();
+use Buki\Router\Router;
+
+$router = new Router();
+
+// Accueil
+$router->get('/', function () {
+    require __DIR__ . '/../app/Controllers/HomeController.php';
+    (new HomeController())->index();
+});
+
+// Test base de données
+$router->get('/db-test', function () {
+    require __DIR__ . '/../app/Controllers/DbTestController.php';
+    (new DbTestController())->index();
+});
+
+$router->run();
