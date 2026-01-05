@@ -6,6 +6,8 @@ session_start();
 
 
 require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../app/Core/Auth.php';
+
 
 use Buki\Router\Router;
 
@@ -29,6 +31,13 @@ $router->get('/db-test', function () {
     (new DbTestController())->index();
 });
 
+// Route vers l’espace administrateur
+$router->get('/admin', function () {
+    require __DIR__ . '/../app/Controllers/AdminController.php';
+    (new AdminController())->index();
+});
+
+
 // Connexion (GET = formulaire, POST = traitement)
 $router->get('/login', function () {
     require __DIR__ . '/../app/Controllers/AuthController.php';
@@ -45,6 +54,13 @@ $router->get('/logout', function () {
     require __DIR__ . '/../app/Controllers/AuthController.php';
     (new AuthController())->logout();
 });
+
+// Route de test pour l’espace ADMIN
+$router->get('/admin', function () {
+    Auth::requireAdmin();
+    echo "<h1>Espace ADMIN ✅</h1><p><a href='/'>Retour</a></p>";
+});
+
 
 
 $router->run();
