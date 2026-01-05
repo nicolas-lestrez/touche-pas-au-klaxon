@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+session_start();
+
+
 require __DIR__ . '/../vendor/autoload.php';
 
 use Buki\Router\Router;
@@ -25,5 +28,23 @@ $router->get('/db-test', function () {
     require __DIR__ . '/../app/Controllers/DbTestController.php';
     (new DbTestController())->index();
 });
+
+// Connexion (GET = formulaire, POST = traitement)
+$router->get('/login', function () {
+    require __DIR__ . '/../app/Controllers/AuthController.php';
+    (new AuthController())->showLogin();
+});
+
+$router->post('/login', function () {
+    require __DIR__ . '/../app/Controllers/AuthController.php';
+    (new AuthController())->login();
+});
+
+// Déconnexion
+$router->get('/logout', function () {
+    require __DIR__ . '/../app/Controllers/AuthController.php';
+    (new AuthController())->logout();
+});
+
 
 $router->run();

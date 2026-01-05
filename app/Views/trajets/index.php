@@ -89,6 +89,20 @@ function formatHeure(string $datetime): string
     </div>
 
     <h1>Trajets proposés</h1>
+
+
+    <?php $user = $_SESSION['user'] ?? null; ?>
+
+    <p>
+        <?php if ($user): ?>
+            Connecté : <strong><?= e($user['prenom'] . ' ' . $user['nom']) ?></strong>
+            (<?= e($user['role']) ?>) — <a href="/logout">Se déconnecter</a>
+        <?php else: ?>
+            <a href="/login">Se connecter</a>
+        <?php endif; ?>
+    </p>
+
+
     <p class="muted">Liste des trajets présents en base.</p>
 
     <table>
