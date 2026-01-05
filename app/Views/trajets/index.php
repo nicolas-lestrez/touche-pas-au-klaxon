@@ -96,11 +96,18 @@ function formatHeure(string $datetime): string
     <p>
         <?php if ($user): ?>
             Connecté : <strong><?= e($user['prenom'] . ' ' . $user['nom']) ?></strong>
-            (<?= e($user['role']) ?>) — <a href="/logout">Se déconnecter</a>
+            (<?= e($user['role']) ?>)
+
+            <?php if ($user['role'] === 'ADMIN'): ?>
+                — <a href="/admin">Espace admin</a>
+            <?php endif; ?>
+
+            — <a href="/logout">Se déconnecter</a>
         <?php else: ?>
             <a href="/login">Se connecter</a>
         <?php endif; ?>
     </p>
+
 
 
     <p class="muted">Liste des trajets présents en base.</p>
