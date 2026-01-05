@@ -33,9 +33,11 @@ $router->get('/db-test', function () {
 
 // Route vers l’espace administrateur
 $router->get('/admin', function () {
+    Auth::requireAdmin();
     require __DIR__ . '/../app/Controllers/AdminController.php';
     (new AdminController())->index();
 });
+
 
 
 // Connexion (GET = formulaire, POST = traitement)
@@ -55,12 +57,17 @@ $router->get('/logout', function () {
     (new AuthController())->logout();
 });
 
-// Route de test pour l’espace ADMIN
-$router->get('/admin', function () {
+// Formulaire création trajet (ADMIN)
+$router->get('/admin/trajets/create', function () {
     Auth::requireAdmin();
-    echo "<h1>Espace ADMIN ✅</h1><p><a href='/'>Retour</a></p>";
+    require __DIR__ . '/../app/Views/admin/trajets/create.php';
 });
 
+// Traitement création trajet (ADMIN)
+$router->post('/admin/trajets/store', function () {
+    require __DIR__ . '/../app/Controllers/AdminTrajetController.php';
+    (new AdminTrajetController())->store();
+});
 
 
 $router->run();

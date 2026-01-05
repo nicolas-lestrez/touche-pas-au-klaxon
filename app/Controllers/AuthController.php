@@ -33,7 +33,8 @@ class AuthController
 
         // On stocke l'utilisateur connecté en session (sans le hash du mdp si tu veux)
         $_SESSION['user'] = [
-            'id' => (int)$user['id_utilisateur'],
+            'id_utilisateur' => (int) $user['id_utilisateur'],
+            'id' => (int) $user['id_utilisateur'],
             'nom' => $user['nom'],
             'prenom' => $user['prenom'],
             'email' => $user['email'],

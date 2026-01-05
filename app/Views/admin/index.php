@@ -8,6 +8,8 @@ function e(string $value): string
 }
 
 $user = $_SESSION['user'] ?? null;
+$flash = $_SESSION['flash'] ?? null;
+unset($_SESSION['flash']);
 ?>
 <!doctype html>
 <html lang="fr">
@@ -21,6 +23,12 @@ $user = $_SESSION['user'] ?? null;
 
     <h1>Espace admin</h1>
 
+    <?php if ($flash): ?>
+        <p style="color: <?= $flash['type'] === 'success' ? 'green' : 'red' ?>;">
+            <?= e($flash['message']) ?>
+        </p>
+    <?php endif; ?>
+
     <p>
         Connecté : <strong><?= $user ? e($user['prenom'] . ' ' . $user['nom']) : '—' ?></strong>
         (<?= $user ? e($user['role']) : '—' ?>)
@@ -30,7 +38,10 @@ $user = $_SESSION['user'] ?? null;
 
     <hr>
 
-    <p>Ici, on mettra les actions admin (ex : créer un trajet, gérer les utilisateurs, etc.).</p>
+    <p>
+        <a href="/admin/trajets/create">➕ Créer un trajet</a>
+    </p>
+
 
 </body>
 
