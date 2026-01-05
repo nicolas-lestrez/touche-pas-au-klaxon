@@ -6,11 +6,14 @@ class AdminController
 {
     public function index(): void
     {
-        // Vérifie que l’utilisateur est bien ADMIN
         require_once __DIR__ . '/../Core/Auth.php';
         Auth::requireAdmin();
 
-        // Affiche la vue admin
+        // ✅ Récupérer les trajets
+        require_once __DIR__ . '/../Models/Trajet.php';
+        $trajets = Trajet::allWithAgences();
+
+        // ✅ Afficher la vue avec $trajets
         require __DIR__ . '/../Views/admin/index.php';
     }
 }
