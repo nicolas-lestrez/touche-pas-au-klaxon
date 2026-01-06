@@ -28,6 +28,31 @@ class Trajet
         return $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public static function availableUpcoming(): array
+    {
+        $pdo = Database::getConnection();
+
+        $sql = "
+        SELECT 
+            t.id_trajet,
+            t.gdh_depart,
+            t.gdh_arrivee,
+            t.nb_places_total,
+            t.nb_places_disponibles,
+            a1.ville AS ville_depart,
+            a2.ville AS ville_arrivee
+        FROM TRAJET t
+        JOIN AGENCE a1 ON a1.id_agence = t.id_agence_depart
+        JOIN AGENCE a2 ON a2.id_agence = t.id_agence_arrivee
+        WHERE t.gdh_depart >= NOW()
+          AND t.nb_places_disponibles > 0
+        ORDER BY t.gdh_depart ASC
+    ";
+
+        return $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
     public static function deleteById(int $id): void
     {
         $pdo = Database::getConnection();

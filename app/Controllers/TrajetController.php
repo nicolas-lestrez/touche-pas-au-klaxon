@@ -9,7 +9,8 @@ class TrajetController
     public function index(): void
     {
         // On récupère les trajets (avec villes départ/arrivée)
-        $trajets = Trajet::allWithAgences();
+        $trajets = Trajet::availableUpcoming();
+
 
         // On affiche la vue "liste des trajets"
         require __DIR__ . '/../Views/trajets/index.php';
