@@ -74,6 +74,12 @@ $router->post('/admin/trajets/delete', function () {
     (new AdminTrajetController())->delete();
 });
 
+// Détail d’un trajet (page)
+$router->get('/trajets/:id', function ($id) {
+    require __DIR__ . '/../app/Controllers/TrajetController.php';
+    (new TrajetController())->show((int)$id);
+});
+
 
 
 $router->run();

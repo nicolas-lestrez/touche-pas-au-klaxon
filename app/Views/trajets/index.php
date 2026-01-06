@@ -159,7 +159,14 @@ $user = $_SESSION['user'] ?? null;
                                 data-places="<?= e((string)$t['nb_places_disponibles']) ?>">
                                 Détails
                             </button>
+
+                            <div class="mt-1">
+                                <a href="/trajets/<?= e((string)$t['id_trajet']) ?>">
+                                    Voir la page
+                                </a>
+                            </div>
                         </td>
+
                     </tr>
                 <?php endforeach; ?>
             <?php endif; ?>

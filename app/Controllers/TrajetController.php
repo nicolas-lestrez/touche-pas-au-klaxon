@@ -18,4 +18,18 @@ class TrajetController
         // require __DIR__ . '/../Views/trajets.php';
         // ou require __DIR__ . '/../Views/home.php';
     }
+    public function show(int $id): void
+    {
+        require_once __DIR__ . '/../Models/Trajet.php';
+
+        $trajet = Trajet::findWithAgencesById($id);
+
+        if (!$trajet) {
+            http_response_code(404);
+            echo "Trajet introuvable.";
+            return;
+        }
+
+        require __DIR__ . '/../Views/trajets/show.php';
+    }
 }
