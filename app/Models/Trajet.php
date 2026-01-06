@@ -40,10 +40,18 @@ class Trajet
             t.nb_places_total,
             t.nb_places_disponibles,
             a1.ville AS ville_depart,
-            a2.ville AS ville_arrivee
+            a2.ville AS ville_arrivee,
+
+            u.prenom AS contact_prenom,
+            u.nom AS contact_nom,
+            u.telephone AS contact_telephone,
+            u.email AS contact_email
+
         FROM TRAJET t
         JOIN AGENCE a1 ON a1.id_agence = t.id_agence_depart
         JOIN AGENCE a2 ON a2.id_agence = t.id_agence_arrivee
+        JOIN UTILISATEUR u ON u.id_utilisateur = t.id_contact
+
         WHERE t.gdh_depart >= NOW()
           AND t.nb_places_disponibles > 0
         ORDER BY t.gdh_depart ASC
@@ -51,6 +59,7 @@ class Trajet
 
         return $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
+
 
 
     public static function deleteById(int $id): void

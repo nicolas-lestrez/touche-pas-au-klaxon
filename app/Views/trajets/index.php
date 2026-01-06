@@ -16,6 +16,8 @@ function formatHeure(string $datetime): string
 {
     return date('H:i', strtotime($datetime));
 }
+
+$user = $_SESSION['user'] ?? null;
 ?>
 <!doctype html>
 <html lang="fr">
@@ -23,6 +25,10 @@ function formatHeure(string $datetime): string
 <head>
     <meta charset="utf-8">
     <title>Touche pas au klaxon — Trajets</title>
+
+    <!-- ✅ Étape 2A : Bootstrap CSS (CDN) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -90,15 +96,12 @@ function formatHeure(string $datetime): string
 
     <h1>Trajets proposés</h1>
 
-
-    <?php $user = $_SESSION['user'] ?? null; ?>
-
     <p>
         <?php if ($user): ?>
             Connecté : <strong><?= e($user['prenom'] . ' ' . $user['nom']) ?></strong>
             (<?= e($user['role']) ?>)
 
-            <?php if ($user['role'] === 'ADMIN'): ?>
+            <?php if (($user['role'] ?? '') === 'ADMIN'): ?>
                 — <a href="/admin">Espace admin</a>
             <?php endif; ?>
 
@@ -107,8 +110,6 @@ function formatHeure(string $datetime): string
             <a href="/login">Se connecter</a>
         <?php endif; ?>
     </p>
-
-
 
     <p class="muted">Liste des trajets présents en base.</p>
 
@@ -122,12 +123,13 @@ function formatHeure(string $datetime): string
                 <th>Date</th>
                 <th>Heure</th>
                 <th>Places</th>
+                <th>Détails</th>
             </tr>
         </thead>
         <tbody>
             <?php if (empty($trajets)): ?>
                 <tr>
-                    <td colspan="7">Aucun trajet trouvé.</td>
+                    <td colspan="8">Aucun trajet trouvé.</td>
                 </tr>
             <?php else: ?>
                 <?php foreach ($trajets as $t): ?>
@@ -139,11 +141,83 @@ function formatHeure(string $datetime): string
                         <td><?= e(formatDate($t['gdh_arrivee'])) ?></td>
                         <td><?= e(formatHeure($t['gdh_arrivee'])) ?></td>
                         <td><?= e((string)$t['nb_places_disponibles']) ?></td>
+
+                        <!-- ✅ Étape 2B : bouton Détails + data-* pour remplir la modale -->
+                        <td>
+                            <button
+                                type="button"
+                                class="btn btn-primary btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#trajetDetailsModal"
+                                data-id="<?= e((string)($t['id_trajet'] ?? '')) ?>"
+                                data-depart="<?= e($t['ville_depart']) ?>"
+                                data-arrivee="<?= e($t['ville_arrivee']) ?>"
+                                data-date-depart="<?= e(formatDate($t['gdh_depart'])) ?>"
+                                data-heure-depart="<?= e(formatHeure($t['gdh_depart'])) ?>"
+                                data-date-arrivee="<?= e(formatDate($t['gdh_arrivee'])) ?>"
+                                data-heure-arrivee="<?= e(formatHeure($t['gdh_arrivee'])) ?>"
+                                data-places="<?= e((string)$t['nb_places_disponibles']) ?>">
+                                Détails
+                            </button>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             <?php endif; ?>
         </tbody>
     </table>
+
+    <!-- ✅ Étape 2C : la modale Bootstrap -->
+    <div class="modal fade" id="trajetDetailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Détails du trajet</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p class="mb-1"><strong>Trajet #</strong> <span id="detailId"></span></p>
+                    <hr>
+
+                    <p class="mb-1"><strong>Départ :</strong> <span id="detailDepart"></span></p>
+                    <p class="mb-1"><strong>Date départ :</strong> <span id="detailDateDepart"></span></p>
+                    <p class="mb-3"><strong>Heure départ :</strong> <span id="detailHeureDepart"></span></p>
+
+                    <p class="mb-1"><strong>Arrivée :</strong> <span id="detailArrivee"></span></p>
+                    <p class="mb-1"><strong>Date arrivée :</strong> <span id="detailDateArrivee"></span></p>
+                    <p class="mb-3"><strong>Heure arrivée :</strong> <span id="detailHeureArrivee"></span></p>
+
+                    <hr>
+                    <p class="mb-0"><strong>Places disponibles :</strong> <span id="detailPlaces"></span></p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ Étape 2D : Bootstrap JS (obligatoire pour la modale) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- ✅ Étape 2E : JS qui remplit la modale -->
+    <script>
+        const modal = document.getElementById('trajetDetailsModal');
+        modal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+
+            document.getElementById('detailId').textContent = button.dataset.id || '-';
+            document.getElementById('detailDepart').textContent = button.dataset.depart || '';
+            document.getElementById('detailArrivee').textContent = button.dataset.arrivee || '';
+
+            document.getElementById('detailDateDepart').textContent = button.dataset.dateDepart || '';
+            document.getElementById('detailHeureDepart').textContent = button.dataset.heureDepart || '';
+
+            document.getElementById('detailDateArrivee').textContent = button.dataset.dateArrivee || '';
+            document.getElementById('detailHeureArrivee').textContent = button.dataset.heureArrivee || '';
+
+            document.getElementById('detailPlaces').textContent = button.dataset.places || '0';
+        });
+    </script>
 
 </body>
 
