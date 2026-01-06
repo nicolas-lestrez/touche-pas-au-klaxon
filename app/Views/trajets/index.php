@@ -26,24 +26,31 @@ $user = $_SESSION['user'] ?? null;
     <meta charset="utf-8">
     <title>Touche pas au klaxon — Trajets</title>
 
-    <!-- ✅ Étape 2A : Bootstrap CSS (CDN) -->
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 30px;
+            margin: 0;
         }
 
-        h1 {
-            font-size: 32px;
-            margin-bottom: 16px;
+        .nav-pill-btn {
+            background: #6c757d;
+            color: #fff !important;
+            border-radius: 12px;
+            padding: 8px 14px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .nav-pill-btn:hover {
+            opacity: .9;
+            text-decoration: none;
         }
 
         table {
-            border-collapse: collapse;
-            width: 900px;
-            max-width: 100%;
+            width: 100%;
         }
 
         thead th {
@@ -62,167 +69,165 @@ $user = $_SESSION['user'] ?? null;
         tbody tr:nth-child(even) {
             background: #f7f7f7;
         }
-
-        .topbar {
-            margin-bottom: 20px;
-            padding: 12px 16px;
-            border: 2px solid #2f353a;
-            border-radius: 12px;
-            width: 900px;
-            max-width: 100%;
-        }
-
-        .muted {
-            color: #666;
-            margin-bottom: 14px;
-        }
-
-        a {
-            color: #2a4bd7;
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
     </style>
 </head>
 
 <body>
 
-    <div class="topbar">
-        <strong>Touche pas au klaxon</strong>
-    </div>
+    <!-- ✅ HEADER FULL WIDTH -->
+    <header class="w-100 border-bottom border-2 rounded-4 py-3 mb-4">
+        <div class="container">
 
-    <h1>Trajets proposés</h1>
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
 
-    <p>
-        <?php if ($user): ?>
-            Connecté : <strong><?= e($user['prenom'] . ' ' . $user['nom']) ?></strong>
-            (<?= e($user['role']) ?>)
+                <!-- LOGO / TITLE -->
+                <a href="/" class="fw-semibold fs-5 text-decoration-none text-dark">
+                    Touche pas au klaxon
+                </a>
 
-            <?php if (($user['role'] ?? '') === 'ADMIN'): ?>
-                — <a href="/admin">Espace admin</a>
-            <?php endif; ?>
 
-            — <a href="/logout">Se déconnecter</a>
-        <?php else: ?>
-            <a href="/login">Se connecter</a>
-        <?php endif; ?>
-    </p>
+                <?php if (!$user): ?>
+                    <!-- VISITEUR -->
+                    <a href="/login" class="btn btn-dark rounded-pill px-4">
+                        Connexion
+                    </a>
+                <?php else: ?>
+                    <!-- CONNECTÉ -->
+                    <div class="d-flex align-items-center flex-wrap gap-3">
 
-    <p class="muted">Liste des trajets présents en base.</p>
+                        <nav class="d-flex align-items-center gap-2">
+                            <a class="nav-pill-btn" href="#">Utilisateurs</a>
+                            <a class="nav-pill-btn" href="#">Agences</a>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Départ</th>
-                <th>Date</th>
-                <th>Heure</th>
-                <th>Destination</th>
-                <th>Date</th>
-                <th>Heure</th>
-                <th>Places</th>
-                <th>Détails</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php if (empty($trajets)): ?>
+                            <?php if (($user['role'] ?? '') === 'ADMIN'): ?>
+                                <a class="nav-pill-btn" href="/admin">Trajets</a>
+                            <?php else: ?>
+                                <a class="nav-pill-btn" href="/trajets">Trajets</a>
+                            <?php endif; ?>
+                        </nav>
+
+                        <div class="text-nowrap">
+                            Bonjour <?= e($user['prenom'] . ' ' . $user['nom']) ?>
+                        </div>
+
+                        <a href="/logout" class="btn btn-dark rounded-pill px-4">
+                            Déconnexion
+                        </a>
+                    </div>
+                <?php endif; ?>
+
+            </div>
+
+        </div>
+    </header>
+
+    <!-- ✅ CONTENU CENTRÉ -->
+    <main class="container">
+
+        <h1 class="mb-3">Trajets proposés</h1>
+
+        <p class="text-muted">Liste des trajets présents en base.</p>
+
+        <table class="table table-bordered align-middle">
+            <thead>
                 <tr>
-                    <td colspan="8">Aucun trajet trouvé.</td>
+                    <th>Départ</th>
+                    <th>Date</th>
+                    <th>Heure</th>
+                    <th>Destination</th>
+                    <th>Date</th>
+                    <th>Heure</th>
+                    <th>Places</th>
+                    <th>Détails</th>
                 </tr>
-            <?php else: ?>
-                <?php foreach ($trajets as $t): ?>
+            </thead>
+            <tbody>
+                <?php if (empty($trajets)): ?>
                     <tr>
-                        <td><?= e($t['ville_depart']) ?></td>
-                        <td><?= e(formatDate($t['gdh_depart'])) ?></td>
-                        <td><?= e(formatHeure($t['gdh_depart'])) ?></td>
-                        <td><?= e($t['ville_arrivee']) ?></td>
-                        <td><?= e(formatDate($t['gdh_arrivee'])) ?></td>
-                        <td><?= e(formatHeure($t['gdh_arrivee'])) ?></td>
-                        <td><?= e((string)$t['nb_places_disponibles']) ?></td>
-
-                        <!-- ✅ Étape 2B : bouton Détails + data-* pour remplir la modale -->
-                        <td>
-                            <button
-                                type="button"
-                                class="btn btn-primary btn-sm"
-                                data-bs-toggle="modal"
-                                data-bs-target="#trajetDetailsModal"
-                                data-id="<?= e((string)($t['id_trajet'] ?? '')) ?>"
-                                data-depart="<?= e($t['ville_depart']) ?>"
-                                data-arrivee="<?= e($t['ville_arrivee']) ?>"
-                                data-date-depart="<?= e(formatDate($t['gdh_depart'])) ?>"
-                                data-heure-depart="<?= e(formatHeure($t['gdh_depart'])) ?>"
-                                data-date-arrivee="<?= e(formatDate($t['gdh_arrivee'])) ?>"
-                                data-heure-arrivee="<?= e(formatHeure($t['gdh_arrivee'])) ?>"
-                                data-places="<?= e((string)$t['nb_places_disponibles']) ?>">
-                                Détails
-                            </button>
-
-                            <div class="mt-1">
-                                <a href="/trajets/<?= e((string)$t['id_trajet']) ?>">
-                                    Voir la page
-                                </a>
-                            </div>
-                        </td>
-
+                        <td colspan="8">Aucun trajet trouvé.</td>
                     </tr>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </tbody>
-    </table>
+                <?php else: ?>
+                    <?php foreach ($trajets as $t): ?>
+                        <tr>
+                            <td><?= e($t['ville_depart']) ?></td>
+                            <td><?= e(formatDate($t['gdh_depart'])) ?></td>
+                            <td><?= e(formatHeure($t['gdh_depart'])) ?></td>
+                            <td><?= e($t['ville_arrivee']) ?></td>
+                            <td><?= e(formatDate($t['gdh_arrivee'])) ?></td>
+                            <td><?= e(formatHeure($t['gdh_arrivee'])) ?></td>
+                            <td><?= e((string)$t['nb_places_disponibles']) ?></td>
+                            <td>
+                                <button
+                                    class="btn btn-primary btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#trajetDetailsModal"
+                                    data-id="<?= e((string)$t['id_trajet']) ?>"
+                                    data-depart="<?= e($t['ville_depart']) ?>"
+                                    data-arrivee="<?= e($t['ville_arrivee']) ?>"
+                                    data-date-depart="<?= e(formatDate($t['gdh_depart'])) ?>"
+                                    data-heure-depart="<?= e(formatHeure($t['gdh_depart'])) ?>"
+                                    data-date-arrivee="<?= e(formatDate($t['gdh_arrivee'])) ?>"
+                                    data-heure-arrivee="<?= e(formatHeure($t['gdh_arrivee'])) ?>"
+                                    data-places="<?= e((string)$t['nb_places_disponibles']) ?>">
+                                    Détails
+                                </button>
 
-    <!-- ✅ Étape 2C : la modale Bootstrap -->
-    <div class="modal fade" id="trajetDetailsModal" tabindex="-1" aria-hidden="true">
+                                <div class="mt-1">
+                                    <a href="/trajets/<?= e((string)$t['id_trajet']) ?>">Voir la page</a>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+
+    </main>
+
+    <!-- MODALE -->
+    <div class="modal fade" id="trajetDetailsModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
 
                 <div class="modal-header">
                     <h5 class="modal-title">Détails du trajet</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body">
-                    <p class="mb-1"><strong>Trajet #</strong> <span id="detailId"></span></p>
+                    <p><strong>Trajet #</strong> <span id="detailId"></span></p>
                     <hr>
-
-                    <p class="mb-1"><strong>Départ :</strong> <span id="detailDepart"></span></p>
-                    <p class="mb-1"><strong>Date départ :</strong> <span id="detailDateDepart"></span></p>
-                    <p class="mb-3"><strong>Heure départ :</strong> <span id="detailHeureDepart"></span></p>
-
-                    <p class="mb-1"><strong>Arrivée :</strong> <span id="detailArrivee"></span></p>
-                    <p class="mb-1"><strong>Date arrivée :</strong> <span id="detailDateArrivee"></span></p>
-                    <p class="mb-3"><strong>Heure arrivée :</strong> <span id="detailHeureArrivee"></span></p>
-
+                    <p><strong>Départ :</strong> <span id="detailDepart"></span></p>
+                    <p><strong>Date départ :</strong> <span id="detailDateDepart"></span></p>
+                    <p><strong>Heure départ :</strong> <span id="detailHeureDepart"></span></p>
                     <hr>
-                    <p class="mb-0"><strong>Places disponibles :</strong> <span id="detailPlaces"></span></p>
+                    <p><strong>Arrivée :</strong> <span id="detailArrivee"></span></p>
+                    <p><strong>Date arrivée :</strong> <span id="detailDateArrivee"></span></p>
+                    <p><strong>Heure arrivée :</strong> <span id="detailHeureArrivee"></span></p>
+                    <hr>
+                    <p><strong>Places disponibles :</strong> <span id="detailPlaces"></span></p>
                 </div>
 
             </div>
         </div>
     </div>
 
-    <!-- ✅ Étape 2D : Bootstrap JS (obligatoire pour la modale) -->
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- ✅ Étape 2E : JS qui remplit la modale -->
     <script>
         const modal = document.getElementById('trajetDetailsModal');
         modal.addEventListener('show.bs.modal', function(event) {
-            const button = event.relatedTarget;
+            const btn = event.relatedTarget;
 
-            document.getElementById('detailId').textContent = button.dataset.id || '-';
-            document.getElementById('detailDepart').textContent = button.dataset.depart || '';
-            document.getElementById('detailArrivee').textContent = button.dataset.arrivee || '';
-
-            document.getElementById('detailDateDepart').textContent = button.dataset.dateDepart || '';
-            document.getElementById('detailHeureDepart').textContent = button.dataset.heureDepart || '';
-
-            document.getElementById('detailDateArrivee').textContent = button.dataset.dateArrivee || '';
-            document.getElementById('detailHeureArrivee').textContent = button.dataset.heureArrivee || '';
-
-            document.getElementById('detailPlaces').textContent = button.dataset.places || '0';
+            detailId.textContent = btn.dataset.id;
+            detailDepart.textContent = btn.dataset.depart;
+            detailArrivee.textContent = btn.dataset.arrivee;
+            detailDateDepart.textContent = btn.dataset.dateDepart;
+            detailHeureDepart.textContent = btn.dataset.heureDepart;
+            detailDateArrivee.textContent = btn.dataset.dateArrivee;
+            detailHeureArrivee.textContent = btn.dataset.heureArrivee;
+            detailPlaces.textContent = btn.dataset.places;
         });
     </script>
 
