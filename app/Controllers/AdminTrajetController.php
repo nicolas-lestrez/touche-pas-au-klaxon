@@ -36,26 +36,26 @@ class AdminTrajetController
         }
 
         $sql = "
-        INSERT INTO TRAJET (
-            gdh_depart,
-            gdh_arrivee,
-            nb_places_total,
-            nb_places_disponibles,
-            id_agence_depart,
-            id_agence_arrivee,
-            id_auteur,
-            id_contact
-        ) VALUES (
-            :gdh_depart,
-            :gdh_arrivee,
-            :nb_places_total,
-            :nb_places_disponibles,
-            :id_agence_depart,
-            :id_agence_arrivee,
-            :id_auteur,
-            :id_contact
-        )
-    ";
+            INSERT INTO TRAJET (
+                gdh_depart,
+                gdh_arrivee,
+                nb_places_total,
+                nb_places_disponibles,
+                id_agence_depart,
+                id_agence_arrivee,
+                id_auteur,
+                id_contact
+            ) VALUES (
+                :gdh_depart,
+                :gdh_arrivee,
+                :nb_places_total,
+                :nb_places_disponibles,
+                :id_agence_depart,
+                :id_agence_arrivee,
+                :id_auteur,
+                :id_contact
+            )
+        ";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
@@ -72,6 +72,30 @@ class AdminTrajetController
         $_SESSION['flash'] = [
             'type' => 'success',
             'message' => 'Trajet créé avec succès ✅'
+        ];
+
+        header('Location: /admin');
+        exit;
+    }
+
+    public function delete(): void
+    {
+        Auth::requireAdmin();
+
+        if (!isset($_POST['id_trajet'])) {
+            $_SESSION['flash'] = ['type' => 'error', 'message' => 'ID manquant'];
+            header('Location: /admin');
+            exit;
+        }
+
+        $id = (int)$_POST['id_trajet'];
+
+        require_once __DIR__ . '/../Models/Trajet.php';
+        Trajet::deleteById($id);
+
+        $_SESSION['flash'] = [
+            'type' => 'success',
+            'message' => 'Trajet supprimé ✅'
         ];
 
         header('Location: /admin');

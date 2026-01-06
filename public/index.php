@@ -69,5 +69,11 @@ $router->post('/admin/trajets/store', function () {
     (new AdminTrajetController())->store();
 });
 
+$router->post('/admin/trajets/delete', function () {
+    require __DIR__ . '/../app/Controllers/AdminTrajetController.php';
+    (new AdminTrajetController())->delete();
+});
+
+
 
 $router->run();
