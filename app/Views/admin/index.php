@@ -143,12 +143,17 @@ $isTrajetsPage = true;
                                 </button>
                             </td>
 
-                            <td>
+                            <td class="d-flex gap-2">
+                                <a class="btn btn-warning btn-sm" href="/admin/trajets/<?= e((string)$t['id_trajet']) ?>/edit">
+                                    ✏️ Modifier
+                                </a>
+
                                 <form method="post" action="/admin/trajets/delete" onsubmit="return confirm('Supprimer ce trajet ?');">
                                     <input type="hidden" name="id_trajet" value="<?= e((string)$t['id_trajet']) ?>">
                                     <button class="btn btn-danger btn-sm" type="submit">🗑 Supprimer</button>
                                 </form>
                             </td>
+
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>

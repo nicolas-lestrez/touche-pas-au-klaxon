@@ -60,40 +60,6 @@ class Trajet
         return $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public static function findById(int $id): ?array
-    {
-        $pdo = Database::getConnection();
-
-        $sql = "
-        SELECT 
-            t.id_trajet,
-            t.gdh_depart,
-            t.gdh_arrivee,
-            t.nb_places_total,
-            t.nb_places_disponibles,
-            a1.ville AS ville_depart,
-            a2.ville AS ville_arrivee,
-            u.prenom AS contact_prenom,
-            u.nom AS contact_nom,
-            u.telephone AS contact_telephone,
-            u.email AS contact_email
-        FROM TRAJET t
-        JOIN AGENCE a1 ON a1.id_agence = t.id_agence_depart
-        JOIN AGENCE a2 ON a2.id_agence = t.id_agence_arrivee
-        JOIN UTILISATEUR u ON u.id_utilisateur = t.id_contact
-        WHERE t.id_trajet = :id
-        LIMIT 1
-    ";
-
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute(['id' => $id]);
-
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row ?: null;
-    }
-
-
-
     public static function deleteById(int $id): void
     {
         $pdo = Database::getConnection();
@@ -138,5 +104,57 @@ class Trajet
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $row ?: null;
+    }
+
+    public static function findByIdForEdit(int $id): ?array
+    {
+        $pdo = Database::getConnection();
+
+        $sql = "
+        SELECT
+            t.id_trajet,
+            t.gdh_depart,
+            t.gdh_arrivee,
+            t.nb_places_total,
+            t.nb_places_disponibles,
+            t.id_agence_depart,
+            t.id_agence_arrivee
+        FROM TRAJET t
+        WHERE t.id_trajet = :id
+        LIMIT 1
+    ";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(['id' => $id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $row ?: null;
+    }
+
+    public static function updateById(int $id, array $data): void
+    {
+        $pdo = Database::getConnection();
+
+        $sql = "
+        UPDATE TRAJET SET
+            gdh_depart = :gdh_depart,
+            gdh_arrivee = :gdh_arrivee,
+            nb_places_total = :nb_places_total,
+            nb_places_disponibles = :nb_places_disponibles,
+            id_agence_depart = :id_agence_depart,
+            id_agence_arrivee = :id_agence_arrivee
+        WHERE id_trajet = :id
+    ";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            'gdh_depart' => $data['gdh_depart'],
+            'gdh_arrivee' => $data['gdh_arrivee'],
+            'nb_places_total' => (int)$data['nb_places_total'],
+            'nb_places_disponibles' => (int)$data['nb_places_disponibles'],
+            'id_agence_depart' => (int)$data['id_agence_depart'],
+            'id_agence_arrivee' => (int)$data['id_agence_arrivee'],
+            'id' => $id,
+        ]);
     }
 }

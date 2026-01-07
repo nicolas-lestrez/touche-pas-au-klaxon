@@ -101,4 +101,74 @@ class AdminTrajetController
         header('Location: /admin');
         exit;
     }
+
+    public function edit(int $id): void
+    {
+        Auth::requireAdmin();
+
+        require_once __DIR__ . '/../Models/Trajet.php';
+
+        $trajet = Trajet::findByIdForEdit($id);
+
+        if (!$trajet) {
+            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Trajet introuvable'];
+            header('Location: /admin');
+            exit;
+        }
+
+        // Vue du formulaire d'édition
+        require __DIR__ . '/../Views/admin/trajets/edit.php';
+    }
+
+    public function update(int $id): void
+    {
+        Auth::requireAdmin();
+
+        require_once __DIR__ . '/../Models/Trajet.php';
+
+        // 1) Nettoyage / formatage dates (datetime-local -> MySQL DATETIME)
+        $gdhDepart  = str_replace('T', ' ', $_POST['gdh_depart'] ?? '') . ':00';
+        $gdhArrivee = str_replace('T', ' ', $_POST['gdh_arrivee'] ?? '') . ':00';
+
+        // 2) Cast des nombres
+        $nbTotal = (int) ($_POST['nb_places_total'] ?? 0);
+        $idAgenceDepart = (int) ($_POST['id_agence_depart'] ?? 0);
+        $idAgenceArrivee = (int) ($_POST['id_agence_arrivee'] ?? 0);
+
+        if ($nbTotal < 1 || $idAgenceDepart < 1 || $idAgenceArrivee < 1) {
+            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Champs invalides'];
+            header("Location: /admin/trajets/$id/edit");
+            exit;
+        }
+
+        // On récupère l'ancien trajet pour gérer les places dispo proprement
+        $old = Trajet::findByIdForEdit($id);
+        if (!$old) {
+            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Trajet introuvable'];
+            header('Location: /admin');
+            exit;
+        }
+
+        // Règle simple (sans système de réservation) :
+        // - si tu réduis le total, les places dispo ne peuvent pas dépasser le total
+        $oldDispo = (int)($old['nb_places_disponibles'] ?? 0);
+        $newDispo = min($oldDispo, $nbTotal);
+
+        Trajet::updateById($id, [
+            'gdh_depart' => $gdhDepart,
+            'gdh_arrivee' => $gdhArrivee,
+            'nb_places_total' => $nbTotal,
+            'nb_places_disponibles' => $newDispo,
+            'id_agence_depart' => $idAgenceDepart,
+            'id_agence_arrivee' => $idAgenceArrivee,
+        ]);
+
+        $_SESSION['flash'] = [
+            'type' => 'success',
+            'message' => 'Trajet modifié avec succès ✅'
+        ];
+
+        header('Location: /admin');
+        exit;
+    }
 }

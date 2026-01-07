@@ -80,6 +80,17 @@ $router->get('/trajets/:id', function ($id) {
     (new TrajetController())->show((int)$id);
 });
 
+// Formulaire édition trajet (ADMIN)
+$router->get('/admin/trajets/:id/edit', function ($id) {
+    require __DIR__ . '/../app/Controllers/AdminTrajetController.php';
+    (new AdminTrajetController())->edit((int)$id);
+});
+
+// Traitement édition trajet (ADMIN)
+$router->post('/admin/trajets/:id/update', function ($id) {
+    require __DIR__ . '/../app/Controllers/AdminTrajetController.php';
+    (new AdminTrajetController())->update((int)$id);
+});
 
 
 $router->run();

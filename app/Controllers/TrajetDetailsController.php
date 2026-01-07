@@ -8,7 +8,7 @@ class TrajetDetailsController
 {
     public function show(int $id): void
     {
-        $trajet = Trajet::findById($id);
+        $trajet = Trajet::findWithAgencesById($id);
 
         if (!$trajet) {
             http_response_code(404);
