@@ -25,11 +25,6 @@ $router->get('/trajets', function () {
     (new TrajetController())->index();
 });
 
-// Test base de données (tu l’as déjà)
-$router->get('/db-test', function () {
-    require __DIR__ . '/../app/Controllers/DbTestController.php';
-    (new DbTestController())->index();
-});
 
 // Route vers l’espace administrateur
 $router->get('/admin', function () {
