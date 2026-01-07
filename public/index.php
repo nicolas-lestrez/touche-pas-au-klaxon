@@ -92,5 +92,18 @@ $router->post('/admin/trajets/:id/update', function ($id) {
     (new AdminTrajetController())->update((int)$id);
 });
 
+// Liste des utilisateurs (ADMIN)
+$router->get('/admin/users', function () {
+    Auth::requireAdmin();
+    require __DIR__ . '/../app/Controllers/AdminUserController.php';
+    (new AdminUserController())->index();
+});
+
+// Liste des agences (ADMIN)
+$router->get('/admin/agences', function () {
+    Auth::requireAdmin();
+    require __DIR__ . '/../app/Controllers/AdminAgenceController.php';
+    (new AdminAgenceController())->index();
+});
 
 $router->run();

@@ -16,82 +16,101 @@ unset($_SESSION['flash']);
 <head>
     <meta charset="utf-8">
     <title>Connexion</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 30px;
-        }
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        .box {
-            width: 420px;
-            max-width: 100%;
-            padding: 18px;
-            border: 2px solid #2f353a;
-            border-radius: 12px;
-        }
-
-        label {
-            display: block;
-            margin-top: 12px;
-        }
-
-        input {
-            width: 100%;
-            padding: 10px;
-            margin-top: 6px;
-        }
-
-        button {
-            margin-top: 14px;
-            padding: 10px 14px;
-        }
-
-        .flash {
-            margin-bottom: 12px;
-            padding: 10px;
-            border-radius: 8px;
-        }
-
-        .success {
-            background: #e6ffed;
-            border: 1px solid #1f883d;
-        }
-
-        .error {
-            background: #ffeef0;
-            border: 1px solid #cf222e;
-        }
-
-        a {
-            color: #2a4bd7;
-            text-decoration: none;
-        }
-    </style>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
-<body>
+<body class="bg-light">
 
-    <h1>Connexion</h1>
+    <!-- Page layout: full height + centered content -->
+    <main class="min-vh-100 d-flex flex-column">
 
-    <?php if ($flash): ?>
-        <div class="flash <?= e($flash['type']) ?>">
-            <?= e($flash['message']) ?>
+        <div class="container flex-grow-1 d-flex align-items-center justify-content-center py-5">
+
+            <div class="w-100" style="max-width: 460px;">
+
+                <h1 class="h3 fw-bold mb-3">Connexion</h1>
+
+                <?php if ($flash): ?>
+                    <?php
+                    $type = $flash['type'] ?? 'success';
+                    $bsClass = $type === 'error' ? 'alert-danger' : 'alert-success';
+                    ?>
+                    <div class="alert <?= e($bsClass) ?> d-flex align-items-center" role="alert">
+                        <div><?= e($flash['message'] ?? '') ?></div>
+                    </div>
+                <?php endif; ?>
+
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4">
+
+                        <form method="POST" action="/login" class="needs-validation" novalidate>
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    class="form-control"
+                                    placeholder="ex: nom@email.com"
+                                    required>
+                                <div class="invalid-feedback">Merci de renseigner un email valide.</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Mot de passe</label>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    class="form-control"
+                                    placeholder="Votre mot de passe"
+                                    required>
+                                <div class="invalid-feedback">Merci de renseigner votre mot de passe.</div>
+                            </div>
+
+                            <button type="submit" class="btn btn-dark w-100 rounded-pill py-2">
+                                Se connecter
+                            </button>
+                        </form>
+
+                        <div class="mt-3 text-center">
+                            <a href="/" class="btn btn-outline-secondary rounded-pill px-4">
+                                ← Retour accueil
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
         </div>
-    <?php endif; ?>
 
-    <div class="box">
-        <form method="POST" action="/login">
-            <label>Email</label>
-            <input type="email" name="email" required>
+        <footer class="py-4 text-center text-secondary small">
+            Touche pas au klaxon — © <?= date('Y') ?>
+        </footer>
 
-            <label>Mot de passe</label>
-            <input type="password" name="password" required>
+    </main>
 
-            <button type="submit">Se connecter</button>
-        </form>
-    </div>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <p style="margin-top:14px;"><a href="/">← Retour accueil</a></p>
+    <!-- Small Bootstrap validation (optional but nice) -->
+    <script>
+        (function() {
+            'use strict';
+            const forms = document.querySelectorAll('.needs-validation');
+            Array.from(forms).forEach(function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        })();
+    </script>
 
 </body>
 

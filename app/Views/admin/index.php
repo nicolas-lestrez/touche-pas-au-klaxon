@@ -192,6 +192,10 @@ $isTrajetsPage = true;
         </div>
     </div>
 
+    <footer style="margin-top: 40px; text-align: center; font-size: 0.9rem; color: #6c757d;">
+        Touche pas au klaxon - Copyright <?= date('Y') ?>
+    </footer>
+
     <!-- ✅ Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 

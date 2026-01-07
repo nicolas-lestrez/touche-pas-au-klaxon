@@ -18,6 +18,7 @@ function formatHeure(string $datetime): string
 }
 
 $user = $_SESSION['user'] ?? null;
+$isAdmin = ($user['role'] ?? '') === 'ADMIN';
 ?>
 <!doctype html>
 <html lang="fr">
@@ -29,9 +30,11 @@ $user = $_SESSION['user'] ?? null;
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <style>
         body {
-            font-family: Arial, sans-serif;
             margin: 0;
         }
 
@@ -48,27 +51,6 @@ $user = $_SESSION['user'] ?? null;
             opacity: .9;
             text-decoration: none;
         }
-
-        table {
-            width: 100%;
-        }
-
-        thead th {
-            background: #2f353a;
-            color: #fff;
-            padding: 10px;
-            text-align: center;
-        }
-
-        tbody td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: center;
-        }
-
-        tbody tr:nth-child(even) {
-            background: #f7f7f7;
-        }
     </style>
 </head>
 
@@ -77,14 +59,12 @@ $user = $_SESSION['user'] ?? null;
     <!-- ✅ HEADER FULL WIDTH -->
     <header class="w-100 border-bottom border-2 rounded-4 py-3 mb-4">
         <div class="container">
-
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
 
                 <!-- LOGO / TITLE -->
                 <a href="/" class="fw-semibold fs-5 text-decoration-none text-dark">
                     Touche pas au klaxon
                 </a>
-
 
                 <?php if (!$user): ?>
                     <!-- VISITEUR -->
@@ -96,10 +76,11 @@ $user = $_SESSION['user'] ?? null;
                     <div class="d-flex align-items-center flex-wrap gap-3">
 
                         <nav class="d-flex align-items-center gap-2">
-                            <a class="nav-pill-btn" href="#">Utilisateurs</a>
-                            <a class="nav-pill-btn" href="#">Agences</a>
+                            <a class="nav-pill-btn" href="/admin/users">Utilisateurs</a>
+                            <a class="nav-pill-btn" href="/admin/agences">Agences</a>
 
-                            <?php if (($user['role'] ?? '') === 'ADMIN'): ?>
+
+                            <?php if ($isAdmin): ?>
                                 <a class="nav-pill-btn" href="/admin">Trajets</a>
                             <?php else: ?>
                                 <a class="nav-pill-btn" href="/trajets">Trajets</a>
@@ -117,119 +98,152 @@ $user = $_SESSION['user'] ?? null;
                 <?php endif; ?>
 
             </div>
-
         </div>
     </header>
 
-    <!-- ✅ CONTENU CENTRÉ -->
     <main class="container">
 
-        <h1 class="mb-3">Trajets proposés</h1>
+        <?php if (!$user): ?>
+            <h1 class="mb-3">Pour obtenir plus d'informations sur un trajet, veuillez vous connecter</h1>
+        <?php else: ?>
+            <h1 class="mb-3">Trajets proposés</h1>
+        <?php endif; ?>
 
-        <p class="text-muted">Liste des trajets présents en base.</p>
-
-        <table class="table table-bordered align-middle">
-            <thead>
-                <tr>
-                    <th>Départ</th>
-                    <th>Date</th>
-                    <th>Heure</th>
-                    <th>Destination</th>
-                    <th>Date</th>
-                    <th>Heure</th>
-                    <th>Places</th>
-                    <th>Détails</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (empty($trajets)): ?>
+        <div class="table-responsive rounded-4 overflow-hidden border">
+            <table class="table table-striped align-middle mb-0">
+                <thead class="table-dark">
                     <tr>
-                        <td colspan="8">Aucun trajet trouvé.</td>
-                    </tr>
-                <?php else: ?>
-                    <?php foreach ($trajets as $t): ?>
-                        <tr>
-                            <td><?= e($t['ville_depart']) ?></td>
-                            <td><?= e(formatDate($t['gdh_depart'])) ?></td>
-                            <td><?= e(formatHeure($t['gdh_depart'])) ?></td>
-                            <td><?= e($t['ville_arrivee']) ?></td>
-                            <td><?= e(formatDate($t['gdh_arrivee'])) ?></td>
-                            <td><?= e(formatHeure($t['gdh_arrivee'])) ?></td>
-                            <td><?= e((string)$t['nb_places_disponibles']) ?></td>
-                            <td>
-                                <button
-                                    class="btn btn-primary btn-sm"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#trajetDetailsModal"
-                                    data-id="<?= e((string)$t['id_trajet']) ?>"
-                                    data-depart="<?= e($t['ville_depart']) ?>"
-                                    data-arrivee="<?= e($t['ville_arrivee']) ?>"
-                                    data-date-depart="<?= e(formatDate($t['gdh_depart'])) ?>"
-                                    data-heure-depart="<?= e(formatHeure($t['gdh_depart'])) ?>"
-                                    data-date-arrivee="<?= e(formatDate($t['gdh_arrivee'])) ?>"
-                                    data-heure-arrivee="<?= e(formatHeure($t['gdh_arrivee'])) ?>"
-                                    data-places="<?= e((string)$t['nb_places_disponibles']) ?>">
-                                    Détails
-                                </button>
+                        <th class="text-center">Départ</th>
+                        <th class="text-center">Date</th>
+                        <th class="text-center">Heure</th>
+                        <th class="text-center">Destination</th>
+                        <th class="text-center">Date</th>
+                        <th class="text-center">Heure</th>
+                        <th class="text-center">Places</th>
 
-                                <div class="mt-1">
-                                    <a href="/trajets/<?= e((string)$t['id_trajet']) ?>">Voir la page</a>
-                                </div>
+                        <?php if ($user): ?>
+                            <th class="text-center">Détails</th>
+                        <?php endif; ?>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <?php $colspan = $user ? 8 : 7; ?>
+
+                    <?php if (empty($trajets)): ?>
+                        <tr>
+                            <td colspan="<?= $colspan ?>" class="text-center py-4">
+                                Aucun trajet trouvé.
                             </td>
                         </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
+                    <?php else: ?>
+                        <?php foreach ($trajets as $t): ?>
+                            <tr>
+                                <td class="text-center"><?= e($t['ville_depart']) ?></td>
+                                <td class="text-center"><?= e(formatDate($t['gdh_depart'])) ?></td>
+                                <td class="text-center"><?= e(formatHeure($t['gdh_depart'])) ?></td>
+                                <td class="text-center"><?= e($t['ville_arrivee']) ?></td>
+                                <td class="text-center"><?= e(formatDate($t['gdh_arrivee'])) ?></td>
+                                <td class="text-center"><?= e(formatHeure($t['gdh_arrivee'])) ?></td>
+                                <td class="text-center"><?= e((string)$t['nb_places_disponibles']) ?></td>
+
+                                <?php if ($user): ?>
+                                    <td class="text-center">
+                                        <div class="d-inline-flex align-items-center gap-2">
+
+                                            <!-- 👁️ MODALE CONTACT -->
+                                            <button
+                                                type="button"
+                                                class="btn btn-sm btn-outline-dark"
+                                                title="Voir le contact"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#contactModal"
+                                                data-auteur="<?= e(trim(($t['contact_prenom'] ?? '') . ' ' . ($t['contact_nom'] ?? ''))) ?>"
+                                                data-telephone="<?= e($t['contact_telephone'] ?? '') ?>"
+                                                data-email="<?= e($t['contact_email'] ?? '') ?>"
+                                                data-places-total="<?= e((string)($t['nb_places_total'] ?? '')) ?>">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+
+                                            <!-- 📓 Voir la page -->
+                                            <a class="btn btn-sm btn-outline-dark"
+                                                title="Voir la page"
+                                                href="/trajets/<?= e((string)$t['id_trajet']) ?>">
+                                                <i class="bi bi-journal-text"></i>
+                                            </a>
+
+                                            <!-- 🗑 Supprimer (ADMIN seulement) -->
+                                            <?php if ($isAdmin): ?>
+                                                <form method="post" action="/admin/trajets/delete"
+                                                    onsubmit="return confirm('Supprimer ce trajet ?');"
+                                                    class="d-inline m-0 p-0">
+                                                    <input type="hidden" name="id_trajet" value="<?= e((string)$t['id_trajet']) ?>">
+                                                    <button class="btn btn-sm btn-outline-danger" type="submit" title="Supprimer">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            <?php endif; ?>
+
+                                        </div>
+                                    </td>
+                                <?php endif; ?>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
 
     </main>
 
-    <!-- MODALE -->
-    <div class="modal fade" id="trajetDetailsModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
+    <?php if ($user): ?>
+        <!-- ✅ MODALE CONTACT -->
+        <div class="modal fade" id="contactModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
 
-                <div class="modal-header">
-                    <h5 class="modal-title">Détails du trajet</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <div class="modal-header">
+                        <h5 class="modal-title">Contact</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <p class="mb-3"><strong>Auteur :</strong> <span id="contactAuteur"></span></p>
+                        <p class="mb-3"><strong>Téléphone :</strong> <span id="contactTelephone"></span></p>
+                        <p class="mb-3"><strong>Email :</strong> <span id="contactEmail"></span></p>
+                        <p class="mb-0"><strong>Nombre total de places :</strong> <span id="contactPlacesTotal"></span></p>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    </div>
+
                 </div>
-
-                <div class="modal-body">
-                    <p><strong>Trajet #</strong> <span id="detailId"></span></p>
-                    <hr>
-                    <p><strong>Départ :</strong> <span id="detailDepart"></span></p>
-                    <p><strong>Date départ :</strong> <span id="detailDateDepart"></span></p>
-                    <p><strong>Heure départ :</strong> <span id="detailHeureDepart"></span></p>
-                    <hr>
-                    <p><strong>Arrivée :</strong> <span id="detailArrivee"></span></p>
-                    <p><strong>Date arrivée :</strong> <span id="detailDateArrivee"></span></p>
-                    <p><strong>Heure arrivée :</strong> <span id="detailHeureArrivee"></span></p>
-                    <hr>
-                    <p><strong>Places disponibles :</strong> <span id="detailPlaces"></span></p>
-                </div>
-
             </div>
         </div>
-    </div>
+    <?php endif; ?>
+
+    <footer style="margin-top: 40px; text-align: center; font-size: 0.9rem; color: #6c757d;">
+        Touche pas au klaxon - Copyright <?= date('Y') ?>
+    </footer>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-        const modal = document.getElementById('trajetDetailsModal');
-        modal.addEventListener('show.bs.modal', function(event) {
-            const btn = event.relatedTarget;
+    <?php if ($user): ?>
+        <script>
+            const modal = document.getElementById('contactModal');
 
-            detailId.textContent = btn.dataset.id;
-            detailDepart.textContent = btn.dataset.depart;
-            detailArrivee.textContent = btn.dataset.arrivee;
-            detailDateDepart.textContent = btn.dataset.dateDepart;
-            detailHeureDepart.textContent = btn.dataset.heureDepart;
-            detailDateArrivee.textContent = btn.dataset.dateArrivee;
-            detailHeureArrivee.textContent = btn.dataset.heureArrivee;
-            detailPlaces.textContent = btn.dataset.places;
-        });
-    </script>
+            modal.addEventListener('show.bs.modal', function(event) {
+                const btn = event.relatedTarget;
+
+                document.getElementById('contactAuteur').textContent = btn.dataset.auteur || '-';
+                document.getElementById('contactTelephone').textContent = btn.dataset.telephone || '-';
+                document.getElementById('contactEmail').textContent = btn.dataset.email || '-';
+                document.getElementById('contactPlacesTotal').textContent = btn.dataset.placesTotal || '-';
+            });
+        </script>
+    <?php endif; ?>
 
 </body>
 
